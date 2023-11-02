@@ -16,6 +16,17 @@
 	// Sélection de la version de la forme à afficher (différentes rotations possibles)
     var rotation = 0;
     
+    // Tableau de définition des couleurs des formes
+    var couleursFormes = [
+        ["Red", "Black"], 
+        ["DarkOrange", "Black"],
+        ["Magenta", "Black"],
+        ["Lime", "Black"],
+        ["DodgerBlue", "Black"],
+        ["Brown", "Black"],
+        ["Yellow", "Black"]
+    ]
+
 	// Tableau de définition des formes
     var forme = new Array();
     forme[0]= [ // Forme 1
@@ -155,9 +166,9 @@
 		for(x=0 ; x<forme[numForme][rotation].length ; x++) {
 			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
                 if(forme[numForme][rotation][y][x] == 1) {
-                    ctx.fillStyle = "#FF0000"; // Couleur du contour de la forme
+                    ctx.fillStyle = couleursFormes[numForme][1]; // Couleur du contour de la forme
                     ctx.fillRect((formX + x) * CARREAU, (formY + y) * CARREAU, CARREAU, CARREAU); // Contour de la forme
-                    ctx.fillStyle = "#00FF00"; // Couleur de remplissage de la forme
+                    ctx.fillStyle = couleursFormes[numForme][0]; // Couleur de remplissage de la forme
                     ctx.fillRect((formX + x) * CARREAU + 1, (formY + y) * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
                 }
             }
