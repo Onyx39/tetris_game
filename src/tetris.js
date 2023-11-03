@@ -10,6 +10,7 @@
 	const Y_INITIAL = 0;
     var formX = X_INITIAL;
     var formY = Y_INITIAL;
+    var delay = 250;
 
 	// Numéro de la forme (du tableau "forme") à afficher 
 	var numForme = 0;
@@ -183,9 +184,16 @@
     function refreshCanvas() {
 		ctx.clearRect(0,0,LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU); // Efface la grille
 		drawForme(); // Dessine la forme
+        setTimeout(() => {
+            formY++;
+            if(formY > 28) formY = 0;
+            //delay--;
+            refreshCanvas();
+          }, delay);
+          
     }
     ///////////////////////////////////////////////////////
-    // inti()
+    // init()
 	//   Initialisation du canvas
     function init() {
         canvas = document.createElement('canvas');
@@ -196,6 +204,19 @@
         ctx = canvas.getContext('2d');
 
 		refreshCanvas();
+    }
+
+
+    function collision() {
+        for(x=0 ; x<forme[numForme][rotation].length ; x++) {
+			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
+                if(forme[numForme][rotation][y][x] == 1) {
+                    if(formX - x < 0){return true}
+                    if(formX + x > LARGEUR_GRILLE) {return true}
+                }
+            }
+        }
+        return false
     }
     // !!! Fin des fonctions !!!
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,26 +231,40 @@
         switch(key) {
             // Remarque : Pour connaitre les "keycodes" : https://keycode.info/
             case 'ArrowUp':  // flèche haut => rotation horaire de la forme
-                rotation++;
-                if(rotation >  forme[numForme].length - 1) rotation = 0;
-                refreshCanvas();
+                // rotation++;
+                // if(rotation >  forme[numForme].length - 1) rotation = 0;
+                // //refreshCanvas();
+                // break;
+
+                temp = rotation;	// On mémorise la rotation actuelle
+                rotation++; 		// On passe à la rotation suivante
+                if(rotation > forme[numForme].length - 1) rotation = 0;
+                if(collision()) rotation = temp; // Si la rotation est impossible on revient à la précédente
+                if(collision()) console.log("collision !!");
                 break;
             
             case 'ArrowDown' : //flèche bas => rotation anti-horaire de la forme
                 rotation--;
                 if(rotation < 0) rotation = forme[numForme].length - 1;
-                refreshCanvas();
+                //refreshCanvas();
+                break;
+
+            case 'ArrowRight' :
+                if(formX < LARGEUR_GRILLE - 3) formX++;
+                break;
+
+            case 'ArrowLeft' :
+                if(formX > 0) formX--;
                 break;
 
             case 't':  // touche t
-                console.log("coucou")
                 // à compléter
 				// pour test, ne fait pas parti du jeu final
 				// permet de changer la pièce à afficher (changement de la variable numForme)
                 numForme++;
                 rotation = 0;
                 if(numForme > forme.length - 1) numForme = 0;
-                refreshCanvas();
+                //refreshCanvas();
                 break;
         }
       }, true);
