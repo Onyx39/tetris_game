@@ -1,25 +1,26 @@
-﻿window.onload = function() {
-	const LARGEUR_GRILLE = 14;  // Nombre de cases en largeur
-    const HAUTEUR_GRILLE = 28;  // Nombre de cases en hauteur
-    const CARREAU = 20;	        // Taille en pixels d'une case de la grille
-    var canvas;                 // Un canvas est un élément HTML dans lequel on peut dessiner des formes
-    var ctx;
-	
+﻿window.onload = function () {
+    const LARGEUR_GRILLE = 14; // Nombre de cases en largeur
+    const HAUTEUR_GRILLE = 28; // Nombre de cases en hauteur
+    const CARREAU = 20; // Taille en pixels d'une case de la grille
+    const grille = new Array(LARGEUR_GRILLE);
+    let canvas; // Un canvas est un élément HTML dans lequel on peut dessiner des formes
+    let ctx;
+
 	// Position de la forme sur la grille
 	const X_INITIAL = 5;
 	const Y_INITIAL = 0;
-    var formX = X_INITIAL;
-    var formY = Y_INITIAL;
-    var delay = 250;
+    let formX = X_INITIAL;
+    let formY = Y_INITIAL;
+    const delay = 250;
 
 	// Numéro de la forme (du tableau "forme") à afficher 
-	var numForme = 0;
+	let numForme = 0;
 	// Sélection de la version de la forme à afficher (différentes rotations possibles)
-    var rotation = 0;
+    let rotation = 0;
     
     // Tableau de définition des couleurs des formes
-    var couleursFormes = [
-        ["Red", "Black"], 
+    const couleursFormes = [
+        ["Red", "Black"],
         ["DarkOrange", "Black"],
         ["Magenta", "Black"],
         ["Lime", "Black"],
@@ -55,7 +56,7 @@
     
 	forme[1] = [ // Forme 2
         [	// rotation 0 (cette forme là n'a besoin que de 2 rotations)
-            [0,0,0],
+            [0, 0,0],
             [0,1,1],
             [1,1,0]
         ],
@@ -155,6 +156,17 @@
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////	    
 	// !!! Les fonctions !!!
+
+    function initGrille () {
+        for(x=0; x<grille.length; x++) {
+            grille[x] = new Array(HAUTEUR_GRILLE)
+            for(y=0; y<grille[x].length; y++) {
+                grille[x][y] = -1;
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////
 	
     // drawForme()
 	//   Dessine une forme à l'écran 
@@ -175,6 +187,35 @@
             }
         }
     }
+    
+    ///////////////////////////////////////////////////////
+
+    function copierFormeDansLaGrille() {
+        for(x=0 ; x<forme[numForme][rotation].length ; x++) {
+			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
+                if(forme[numForme][rotation][y][x] == 1) {
+                    grille[formX + x][formY + y] = numForme;
+                }
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////
+
+    function drawGrille () {
+        for(x=0 ; x<grille.length ; x++) {
+			for(y=0 ; y<grille[x].length ; y++) {
+                if(grille[x][y] != -1) {
+                    ctx.fillStyle = couleursFormes[grille[x][y]][1]; // Couleur du contour de la forme
+                    ctx.fillRect(x * CARREAU, y * CARREAU, CARREAU, CARREAU); // Contour de la forme
+                    ctx.fillStyle = couleursFormes[grille[x][y]][0]; // Couleur de remplissage de la forme
+                    ctx.fillRect(x * CARREAU + 1, y * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
+                }
+            }
+        }
+    }
+
+
     ///////////////////////////////////////////////////////
     // refreshCanvas()
 	//   Rafraichi l'affichage :
@@ -184,9 +225,16 @@
     function refreshCanvas() {
 		ctx.clearRect(0,0,LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU); // Efface la grille
 		drawForme(); // Dessine la forme
+        drawGrille();
         setTimeout(() => {
-            formY++;
-            if(collision()) formY = 0;
+            formY++; // La forme descend
+            if(collision()) {
+                formY--; // En cas de collision on revient en arrière
+                copierFormeDansLaGrille();
+                formY = Y_INITIAL; // Une nouvelle forme arrive en haut du canvas
+                formX = X_INITIAL;
+                rotation = 0;
+            }
             //delay--;
             refreshCanvas();
           }, delay);
@@ -196,6 +244,8 @@
     // init()
 	//   Initialisation du canvas
     function init() {
+        initGrille();
+        // console.table(grille);
         canvas = document.createElement('canvas');
         canvas.width = LARGEUR_GRILLE * CARREAU;
         canvas.height = HAUTEUR_GRILLE * CARREAU;
@@ -206,14 +256,18 @@
 		refreshCanvas();
     }
 
+    ///////////////////////////////////////////////////////
+
 
     function collision() {
         for(x=0 ; x<forme[numForme][rotation].length ; x++) {
 			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
                 if(forme[numForme][rotation][y][x] == 1) {
+                    console.log(formX + x, formY + y);
                     if(formX + x < 0){return true}
                     if(formX + x > LARGEUR_GRILLE - 1) {return true}
                     if(formY + y > HAUTEUR_GRILLE - 1) {return true}
+                    if(grille[formX + x][formY + y] != -1){return true}
                 }
             }
         }
