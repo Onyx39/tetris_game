@@ -250,7 +250,6 @@
 
                 temp = formX;	// On mémorise la rotation actuelle
                 formX++; 		// On passe à la rotation suivante
-                if(collision()) console.log("collision droite");
                 if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
@@ -258,7 +257,6 @@
                 // if(formX > 0) formX--;
                 temp = formX;	// On mémorise la rotation actuelle
                 formX--; 		// On passe à la rotation suivante
-                if(collision()) console.log("collision gauche");
                 if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
