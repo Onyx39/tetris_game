@@ -3,6 +3,7 @@
     const HAUTEUR_GRILLE = 28; // Nombre de cases en hauteur
     const CARREAU = 20; // Taille en pixels d'une case de la grille
     const grille = new Array(LARGEUR_GRILLE);
+    let formeSuivante = 0;
     let canvas; // Un canvas est un élément HTML dans lequel on peut dessiner des formes
     let ctx;
 
@@ -175,14 +176,14 @@
 	//		rotation : version de la forme à afficher (tableau forme[numForme])
 	//		formX : Position horizontale de la forme sur la grille
 	//		formY : Position verticale de la forme sur la grille
-    function drawForme() {
-		for(x=0 ; x<forme[numForme][rotation].length ; x++) {
-			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
-                if(forme[numForme][rotation][y][x] == 1) {
-                    ctx.fillStyle = couleursFormes[numForme][1]; // Couleur du contour de la forme
-                    ctx.fillRect((formX + x) * CARREAU, (formY + y) * CARREAU, CARREAU, CARREAU); // Contour de la forme
-                    ctx.fillStyle = couleursFormes[numForme][0]; // Couleur de remplissage de la forme
-                    ctx.fillRect((formX + x) * CARREAU + 1, (formY + y) * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
+    function drawForme(numforme, formx, formy, rotationn) {
+		for(x=0 ; x<forme[numforme][rotationn].length ; x++) {
+			for(y=0 ; y<forme[numforme][rotationn].length ; y++) {
+                if(forme[numforme][rotationn][y][x] == 1) {
+                    ctx.fillStyle = couleursFormes[numforme][1]; // Couleur du contour de la forme
+                    ctx.fillRect((formx + x) * CARREAU, (formy + y) * CARREAU, CARREAU, CARREAU); // Contour de la forme
+                    ctx.fillStyle = couleursFormes[numforme][0]; // Couleur de remplissage de la forme
+                    ctx.fillRect((formx + x) * CARREAU + 1, (formy + y) * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
                 }
             }
         }
@@ -215,6 +216,11 @@
         }
     }
 
+    ///////////////////////////////////////////////////////
+
+    function nouvelleForme () {
+        return Math.floor(Math.random() * (forme.length))
+    }
 
     ///////////////////////////////////////////////////////
     // refreshCanvas()
@@ -224,7 +230,9 @@
     //      Utilisation de l'objet canvas : https://developer.mozilla.org/fr/docs/Web/API/Canvas_API/Tutorial/Basic_usage
     function refreshCanvas() {
 		ctx.clearRect(0,0,LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU); // Efface la grille
-		drawForme(); // Dessine la forme
+		drawForme(numForme, formX, formY, rotation); // Dessine la forme
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 5, 20, 200, 200);
+        drawForme(formeSuivante, 16, 1.5, 0);
         drawGrille();
         setTimeout(() => {
             formY++; // La forme descend
@@ -233,6 +241,8 @@
                 copierFormeDansLaGrille();
                 formY = Y_INITIAL; // Une nouvelle forme arrive en haut du canvas
                 formX = X_INITIAL;
+                numForme = formeSuivante;
+                formeSuivante = nouvelleForme();
                 rotation = 0;
             }
             //delay--;
@@ -245,13 +255,24 @@
 	//   Initialisation du canvas
     function init() {
         initGrille();
-        // console.table(grille);
+        numForme = nouvelleForme();
+        formeSuivante = nouvelleForme();
         canvas = document.createElement('canvas');
-        canvas.width = LARGEUR_GRILLE * CARREAU;
+        canvas.width = (LARGEUR_GRILLE * CARREAU) + 150;
         canvas.height = HAUTEUR_GRILLE * CARREAU;
         canvas.style.border = "1px solid";
         document.body.appendChild(canvas);  // Ajoute le canvas à la page html
         ctx = canvas.getContext('2d');
+        ctx.font = "15px serif";
+        ctx.fillText("Prochaine forme", (LARGEUR_GRILLE * CARREAU) + 10, 20);
+        ctx.lineTo(10, 500)
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.moveTo(LARGEUR_GRILLE * CARREAU, 0);
+        ctx.lineTo(LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU);
+
+        // Draw the Path
+        ctx.stroke();
 
 		refreshCanvas();
     }
@@ -263,7 +284,6 @@
         for(x=0 ; x<forme[numForme][rotation].length ; x++) {
 			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
                 if(forme[numForme][rotation][y][x] == 1) {
-                    console.log(formX + x, formY + y);
                     if(formX + x < 0){return true}
                     if(formX + x > LARGEUR_GRILLE - 1) {return true}
                     if(formY + y > HAUTEUR_GRILLE - 1) {return true}
