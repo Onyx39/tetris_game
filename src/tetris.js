@@ -186,7 +186,7 @@
 		drawForme(); // Dessine la forme
         setTimeout(() => {
             formY++;
-            if(formY > 28) formY = 0;
+            if(collision()) formY = 0;
             //delay--;
             refreshCanvas();
           }, delay);
@@ -211,8 +211,9 @@
         for(x=0 ; x<forme[numForme][rotation].length ; x++) {
 			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
                 if(forme[numForme][rotation][y][x] == 1) {
-                    if(formX - x < 0){return true}
-                    if(formX + x > LARGEUR_GRILLE) {return true}
+                    if(formX + x < 0){return true}
+                    if(formX + x > LARGEUR_GRILLE - 1) {return true}
+                    if(formY + y > HAUTEUR_GRILLE - 1) {return true}
                 }
             }
         }
@@ -231,30 +232,34 @@
         switch(key) {
             // Remarque : Pour connaitre les "keycodes" : https://keycode.info/
             case 'ArrowUp':  // flèche haut => rotation horaire de la forme
-                // rotation++;
-                // if(rotation >  forme[numForme].length - 1) rotation = 0;
-                // //refreshCanvas();
-                // break;
-
                 temp = rotation;	// On mémorise la rotation actuelle
                 rotation++; 		// On passe à la rotation suivante
                 if(rotation > forme[numForme].length - 1) rotation = 0;
                 if(collision()) rotation = temp; // Si la rotation est impossible on revient à la précédente
-                if(collision()) console.log("collision !!");
                 break;
             
             case 'ArrowDown' : //flèche bas => rotation anti-horaire de la forme
-                rotation--;
+                temp = rotation;	// On mémorise la rotation actuelle
+                rotation--; 		// On passe à la rotation suivante
                 if(rotation < 0) rotation = forme[numForme].length - 1;
-                //refreshCanvas();
+                if(collision()) rotation = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
             case 'ArrowRight' :
-                if(formX < LARGEUR_GRILLE - 3) formX++;
+                // if(formX < LARGEUR_GRILLE - 3) formX++;
+
+                temp = formX;	// On mémorise la rotation actuelle
+                formX++; 		// On passe à la rotation suivante
+                if(collision()) console.log("collision droite");
+                if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
             case 'ArrowLeft' :
-                if(formX > 0) formX--;
+                // if(formX > 0) formX--;
+                temp = formX;	// On mémorise la rotation actuelle
+                formX--; 		// On passe à la rotation suivante
+                if(collision()) console.log("collision gauche");
+                if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
             case 't':  // touche t
@@ -264,7 +269,6 @@
                 numForme++;
                 rotation = 0;
                 if(numForme > forme.length - 1) numForme = 0;
-                //refreshCanvas();
                 break;
         }
       }, true);
