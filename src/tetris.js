@@ -4,6 +4,7 @@
     const CARREAU = 20; // Taille en pixels d'une case de la grille
     const grille = new Array(LARGEUR_GRILLE);
     let formeSuivante = 0;
+    let ctrLignes = 0;
     let canvas; // Un canvas est un élément HTML dans lequel on peut dessiner des formes
     let ctx;
 
@@ -12,7 +13,7 @@
 	const Y_INITIAL = 0;
     let formX = X_INITIAL;
     let formY = Y_INITIAL;
-    const delay = 250;
+    let delay = 250;
 
 	// Numéro de la forme (du tableau "forme") à afficher 
 	let numForme = 0;
@@ -223,6 +224,37 @@
     }
 
     ///////////////////////////////////////////////////////
+
+    function effaceLigne (numero) {
+        for(i=numero; i>1; i--) {
+            console.log(i);
+            for(j=0; j<LARGEUR_GRILLE; j++) {
+                grille[j][i] = grille[j][i-1]
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////
+
+    function verifierLignes () {
+        console.log("verifier ligne", grille.length);
+        nombre = 0;
+        for(i=0; i< grille[0].length; i++) {
+            minus_one_present = false
+            for(j=0; j<grille.length; j++) {
+                if(grille[j][i] == -1) {minus_one_present = true}
+            }
+            if (! minus_one_present) {
+                console.log("found!!!!!!!!!!")
+                nombre++;
+                effaceLigne(i)
+                ctrLignes++;
+            }
+        }
+        return nombre;
+    }
+
+    ///////////////////////////////////////////////////////
     // refreshCanvas()
 	//   Rafraichi l'affichage :
 	//      - efface le canvas
@@ -231,19 +263,24 @@
     function refreshCanvas() {
 		ctx.clearRect(0,0,LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU); // Efface la grille
 		drawForme(numForme, formX, formY, rotation); // Dessine la forme
-        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 5, 20, 200, 200);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 5, 20, 150, 100);
         drawForme(formeSuivante, 16, 1.5, 0);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 190, 50, 500);
+        ctx.fillStyle = "Black";
+        ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
         drawGrille();
         setTimeout(() => {
             formY++; // La forme descend
             if(collision()) {
                 formY--; // En cas de collision on revient en arrière
                 copierFormeDansLaGrille();
+                verifierLignes();
                 formY = Y_INITIAL; // Une nouvelle forme arrive en haut du canvas
                 formX = X_INITIAL;
                 numForme = formeSuivante;
                 formeSuivante = nouvelleForme();
                 rotation = 0;
+                if(delay = 100) delay = 250;
             }
             //delay--;
             refreshCanvas();
@@ -265,6 +302,8 @@
         ctx = canvas.getContext('2d');
         ctx.font = "15px serif";
         ctx.fillText("Prochaine forme", (LARGEUR_GRILLE * CARREAU) + 10, 20);
+        ctx.fillText("Lignes complétées", (LARGEUR_GRILLE * CARREAU) + 5, 175);
+        ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
         ctx.lineTo(10, 500)
         ctx.beginPath();
         ctx.lineWidth = 3;
@@ -332,6 +371,14 @@
                 temp = formX;	// On mémorise la rotation actuelle
                 formX--; 		// On passe à la rotation suivante
                 if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
+                break;
+
+            case ' ' :
+                delay = 50;
+                break;
+            
+            case 'e' :
+                effaceLigne(25);
                 break;
 
             case 't':  // touche t
