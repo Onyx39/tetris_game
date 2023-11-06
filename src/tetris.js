@@ -2,9 +2,10 @@
     const LARGEUR_GRILLE = 14; // Nombre de cases en largeur
     const HAUTEUR_GRILLE = 28; // Nombre de cases en hauteur
     const CARREAU = 20; // Taille en pixels d'une case de la grille
-    const grille = new Array(LARGEUR_GRILLE);
+    let grille = new Array(LARGEUR_GRILLE);
     let formeSuivante = 0;
     let ctrLignes = 0;
+    let score = 0;
     let canvas; // Un canvas est un élément HTML dans lequel on peut dessiner des formes
     let ctx;
 
@@ -248,7 +249,8 @@
                 console.log("found!!!!!!!!!!")
                 nombre++;
                 effaceLigne(i)
-                ctrLignes++;
+                ctrLignes++
+                score++;
             }
         }
         return nombre;
@@ -265,13 +267,15 @@
 		drawForme(numForme, formX, formY, rotation); // Dessine la forme
         ctx.clearRect(LARGEUR_GRILLE * CARREAU + 5, 20, 150, 100);
         drawForme(formeSuivante, 16, 1.5, 0);
-        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 190, 50, 500);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 190, 50, 30);
         ctx.fillStyle = "Black";
         ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 260, 50, 30);
+        ctx.fillText(score, LARGEUR_GRILLE * CARREAU + 70, 280);
         drawGrille();
         setTimeout(() => {
             formY++; // La forme descend
-            if(collision()) {
+            if(collision() == 1) {
                 formY--; // En cas de collision on revient en arrière
                 copierFormeDansLaGrille();
                 verifierLignes();
@@ -282,7 +286,9 @@
                 rotation = 0;
                 if(delay = 100) delay = 250;
             }
-            //delay--;
+            if(collision() == 2) {
+                fin_de_partie();
+            }
             refreshCanvas();
           }, delay);
           
@@ -302,8 +308,9 @@
         ctx = canvas.getContext('2d');
         ctx.font = "15px serif";
         ctx.fillText("Prochaine forme", (LARGEUR_GRILLE * CARREAU) + 10, 20);
-        ctx.fillText("Lignes complétées", (LARGEUR_GRILLE * CARREAU) + 5, 175);
+        ctx.fillText("Lignes complétées", (LARGEUR_GRILLE * CARREAU) + 5, 180);
         ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
+        ctx.fillText("Score", (LARGEUR_GRILLE * CARREAU) + 50, 250);
         ctx.lineTo(10, 500)
         ctx.beginPath();
         ctx.lineWidth = 3;
@@ -319,18 +326,39 @@
     ///////////////////////////////////////////////////////
 
 
+    function fin_de_partie () {
+
+        if (confirm("Fin de la partie !\n\nVous avez complété " + ctrLignes + " lignes.\nVotre score est de " + score + ".\n\n  Appuyez sur 'OK' pour rejouer ou sur 'Cancel' pour arrêter le jeu.")) {
+            formY--;
+            location.reload();
+          } else {
+            formY--;
+            delay = 10000000;
+          }
+    }
+
+
+    ///////////////////////////////////////////////////////
+
+
     function collision() {
         for(x=0 ; x<forme[numForme][rotation].length ; x++) {
 			for(y=0 ; y<forme[numForme][rotation].length ; y++) {
                 if(forme[numForme][rotation][y][x] == 1) {
-                    if(formX + x < 0){return true}
-                    if(formX + x > LARGEUR_GRILLE - 1) {return true}
-                    if(formY + y > HAUTEUR_GRILLE - 1) {return true}
-                    if(grille[formX + x][formY + y] != -1){return true}
+                    if(formX + x < 0){return 1}
+                    if(formX + x > LARGEUR_GRILLE - 1) {return 1}
+                    if(formY + y > HAUTEUR_GRILLE - 1) {
+                        if (formY == 0 || formY == 1){return 2}
+                        return 1
+                    }
+                    if(grille[formX + x][formY + y] != -1){
+                        if (formY == 0 || formY == 1){return 2}
+                        return 1
+                    }
                 }
             }
         }
-        return false
+        return 0
     }
     // !!! Fin des fonctions !!!
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -378,7 +406,7 @@
                 break;
             
             case 'e' :
-                effaceLigne(25);
+                fin_de_partie();
                 break;
 
             case 't':  // touche t
