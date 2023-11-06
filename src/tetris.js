@@ -365,6 +365,7 @@
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     // !!! Code !!!
 	// Seule ligne de code... avec la gestion des évènements clavier
+    window.alert("Bienvenue sur le jeu Tetris !\nVous connaissez probablement les règles, alors voici les commandes :\n\n   Faire pivoter les pièces : flèches haut et bas du clavier\n   Déplacer les pièces : flèches gauche et droite du clavier\n   Faire tomber une pièce plus rapidement : barre espace\n   Mettre le jeu en pause : entrer\n\nBon jeu !")
     init();
 
 	// Gestion des évènements clavier
@@ -409,14 +410,18 @@
                 fin_de_partie();
                 break;
 
-            case 't':  // touche t
-                // à compléter
-				// pour test, ne fait pas parti du jeu final
-				// permet de changer la pièce à afficher (changement de la variable numForme)
-                numForme++;
-                rotation = 0;
-                if(numForme > forme.length - 1) numForme = 0;
+            case 'Enter' :
+                window.alert("Le jeu est en pause.\nPour reprendre, cliquez sur 'OK'.")
                 break;
+
+            // case 't':  // touche t
+            //     // à compléter
+			// 	// pour test, ne fait pas parti du jeu final
+			// 	// permet de changer la pièce à afficher (changement de la variable numForme)
+            //     numForme++;
+            //     rotation = 0;
+            //     if(numForme > forme.length - 1) numForme = 0;
+            //     break;
         }
       }, true);
 }
