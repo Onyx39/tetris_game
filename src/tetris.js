@@ -6,6 +6,8 @@
     let formeSuivante = 0;
     let ctrLignes = 0;
     let score = 0;
+    let niveau = 1;
+    let afficher_grillle = false;
     let canvas; // Un canvas est un élément HTML dans lequel on peut dessiner des formes
     let ctx;
 
@@ -205,6 +207,18 @@
 
     ///////////////////////////////////////////////////////
 
+    function afficherAide () {
+        window.alert("Bienvenue sur le jeu Tetris !\nVous connaissez probablement les règles, alors voici les commandes :\n\n   Faire pivoter les pièces : flèches haut et bas du clavier\n   Déplacer les pièces : flèches gauche et droite du clavier\n   Faire tomber une pièce plus rapidement : barre espace\n   Mettre le jeu en pause : entrer\n\nPour réafficher cette aide à tout moment dans le jeu, appuyer sur 'h'.\n\nBon jeu !")
+    }
+
+    ///////////////////////////////////////////////////////
+
+    function mettre_pause () {
+        window.alert("Le jeu est en pause.\nPour reprendre, cliquez sur 'OK'.")
+    }
+
+    ///////////////////////////////////////////////////////
+
     function drawGrille () {
         for(x=0 ; x<grille.length ; x++) {
 			for(y=0 ; y<grille[x].length ; y++) {
@@ -213,6 +227,25 @@
                     ctx.fillRect(x * CARREAU, y * CARREAU, CARREAU, CARREAU); // Contour de la forme
                     ctx.fillStyle = couleursFormes[grille[x][y]][0]; // Couleur de remplissage de la forme
                     ctx.fillRect(x * CARREAU + 1, y * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
+                }
+                // else {
+                //     ctx.fillStyle = "Black";
+                //     ctx.fillRect(x * CARREAU,  y * CARREAU, CARREAU, CARREAU); // Contour de la forme
+                //     ctx.fillStyle = "White" // Couleur de remplissage de la forme
+                //     ctx.fillRect(x * CARREAU + 1, y * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
+
+                // }
+            }
+            if(afficher_grillle) {
+                colors = ["darkblue", "darkred"]
+                ctx.lineWidth = 1;
+                for (i=1; i<LARGEUR_GRILLE; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * CARREAU, 0)
+                    ctx.lineTo(i * CARREAU, HAUTEUR_GRILLE * CARREAU);
+                    if(i%2 == 0) {ctx.strokeStyle = colors[0]}
+                    else {ctx.strokeStyle = colors[1]}
+                    ctx.stroke();
                 }
             }
         }
@@ -228,7 +261,6 @@
 
     function effaceLigne (numero) {
         for(i=numero; i>1; i--) {
-            console.log(i);
             for(j=0; j<LARGEUR_GRILLE; j++) {
                 grille[j][i] = grille[j][i-1]
             }
@@ -238,7 +270,6 @@
     ///////////////////////////////////////////////////////
 
     function verifierLignes () {
-        console.log("verifier ligne", grille.length);
         nombre = 0;
         for(i=0; i< grille[0].length; i++) {
             minus_one_present = false
@@ -250,10 +281,14 @@
                 nombre++;
                 effaceLigne(i)
                 ctrLignes++
-                score++;
             }
         }
         return nombre;
+    }
+
+    function demander_grille () {
+        let val = reponse = window.prompt("Par défaut, ce jeu ne comporte pas de grille.\nSi vous souhaitez jouer avec une grille, entrer 'oui' dans la barre ci-dessous, sinon, entrer 'non'.")
+        return val;
     }
 
     ///////////////////////////////////////////////////////
@@ -270,15 +305,19 @@
         ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 190, 50, 30);
         ctx.fillStyle = "Black";
         ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
-        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 260, 50, 30);
-        ctx.fillText(score, LARGEUR_GRILLE * CARREAU + 70, 280);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 30, 260, 90, 30);
+        ctx.fillText(score, LARGEUR_GRILLE * CARREAU + 50, 280);
+        ctx.clearRect(LARGEUR_GRILLE * CARREAU + 50, 330, 50, 30);
+        ctx.fillText(niveau, LARGEUR_GRILLE * CARREAU + 70, 350);
         drawGrille();
         setTimeout(() => {
             formY++; // La forme descend
             if(collision() == 1) {
                 formY--; // En cas de collision on revient en arrière
                 copierFormeDansLaGrille();
-                verifierLignes();
+                lignes = verifierLignes();
+                score = score + 100 * lignes * lignes * niveau;
+                if (ctrLignes >= niveau * 5 && niveau <= 3) niveau = Math.floor(ctrLignes/5)
                 formY = Y_INITIAL; // Une nouvelle forme arrive en haut du canvas
                 formX = X_INITIAL;
                 numForme = formeSuivante;
@@ -297,6 +336,9 @@
     // init()
 	//   Initialisation du canvas
     function init() {
+        afficherAide();
+        let reponse = demander_grille();
+        if(reponse == 'oui') afficher_grillle = true;
         initGrille();
         numForme = nouvelleForme();
         formeSuivante = nouvelleForme();
@@ -309,8 +351,9 @@
         ctx.font = "15px serif";
         ctx.fillText("Prochaine forme", (LARGEUR_GRILLE * CARREAU) + 10, 20);
         ctx.fillText("Lignes complétées", (LARGEUR_GRILLE * CARREAU) + 5, 180);
-        ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
+        // ctx.fillText(ctrLignes, (LARGEUR_GRILLE * CARREAU) + 70, 210);
         ctx.fillText("Score", (LARGEUR_GRILLE * CARREAU) + 50, 250);
+        ctx.fillText("Niveau", (LARGEUR_GRILLE * CARREAU) + 47, 320);
         ctx.lineTo(10, 500)
         ctx.beginPath();
         ctx.lineWidth = 3;
@@ -320,6 +363,7 @@
         // Draw the Path
         ctx.stroke();
 
+
 		refreshCanvas();
     }
 
@@ -328,7 +372,7 @@
 
     function fin_de_partie () {
 
-        if (confirm("Fin de la partie !\n\nVous avez complété " + ctrLignes + " lignes.\nVotre score est de " + score + ".\n\n  Appuyez sur 'OK' pour rejouer ou sur 'Cancel' pour arrêter le jeu.")) {
+        if (confirm("Fin de la partie !\n\nVous avez complété " + ctrLignes + " lignes.\nVotre score est de " + score + ".\n\nAppuyez sur 'OK' pour rejouer ou sur 'Cancel' pour arrêter le jeu.")) {
             formY--;
             location.reload();
           } else {
@@ -365,7 +409,6 @@
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     // !!! Code !!!
 	// Seule ligne de code... avec la gestion des évènements clavier
-    window.alert("Bienvenue sur le jeu Tetris !\nVous connaissez probablement les règles, alors voici les commandes :\n\n   Faire pivoter les pièces : flèches haut et bas du clavier\n   Déplacer les pièces : flèches gauche et droite du clavier\n   Faire tomber une pièce plus rapidement : barre espace\n   Mettre le jeu en pause : entrer\n\nBon jeu !")
     init();
 
 	// Gestion des évènements clavier
@@ -411,7 +454,11 @@
                 break;
 
             case 'Enter' :
-                window.alert("Le jeu est en pause.\nPour reprendre, cliquez sur 'OK'.")
+                mettre_pause();
+                break;
+
+            case 'h' : 
+                afficherAide();
                 break;
 
             // case 't':  // touche t
