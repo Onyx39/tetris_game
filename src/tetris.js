@@ -2,8 +2,12 @@
     const LARGEUR_GRILLE = 14; // Nombre de cases en largeur
     const HAUTEUR_GRILLE = 28; // Nombre de cases en hauteur
     const CARREAU = 20; // Taille en pixels d'une case de la grille
-    const NIVEAU_MAX = 3;
-    const LIGNES_PAR_NIVEAU = 2;
+    const NIVEAU_MAX = 10;
+    const LIGNES_PAR_NIVEAU = 10;
+    const AUDIO = new Audio('../tetris.mp3');
+    AUDIO.load();
+    AUDIO.loop = true;
+    AUDIO.autoplay;
     let grille = new Array(LARGEUR_GRILLE);
     let formeSuivante = 0;
     let ctrLignes = 0;
@@ -247,13 +251,17 @@
     ///////////////////////////////////////////////////////
 
     function afficherAide () {
+        AUDIO.pause();
         window.alert("Bienvenue sur le jeu Tetris !\nVous connaissez probablement les règles, alors voici les commandes :\n\n   Faire pivoter les pièces : flèches haut et bas du clavier\n   Déplacer les pièces : flèches gauche et droite du clavier\n   Faire tomber une pièce plus rapidement : barre espace\n   Mettre le jeu en pause : entrer\n\nPour réafficher cette aide à tout moment dans le jeu, appuyer sur 'h'.\n\nBon jeu !")
+        AUDIO.play();
     }
 
     ///////////////////////////////////////////////////////
 
     function mettre_pause () {
+        AUDIO.pause();
         window.alert("Le jeu est en pause.\nPour reprendre, cliquez sur 'OK'.")
+        AUDIO.play();
     }
 
     ///////////////////////////////////////////////////////
@@ -317,11 +325,6 @@
         return nombre;
     }
 
-    function demander_grille () {
-        let val = reponse = window.prompt("Par défaut, ce jeu ne comporte pas de grille.\nSi vous souhaitez jouer avec une grille, entrer 'oui' dans la barre ci-dessous, sinon, entrer 'non'.")
-        return val;
-    }
-
     ///////////////////////////////////////////////////////
     // refreshCanvas()
 	//   Rafraichi l'affichage :
@@ -350,14 +353,15 @@
                 lignes = verifierLignes();
                 score = score + 100 * lignes * lignes * niveau;
                 if (ctrLignes >= niveau * LIGNES_PAR_NIVEAU && niveau < NIVEAU_MAX) {
-                    niveau = Math.floor(ctrLignes/2) + 1
+                    niveau = Math.floor(ctrLignes/LIGNES_PAR_NIVEAU) + 1
+                    delay = 250 - (20 * (niveau - 1))
                 }
                 formY = Y_INITIAL; // Une nouvelle forme arrive en haut du canvas
                 formX = X_INITIAL;
                 numForme = formeSuivante;
                 formeSuivante = nouvelleForme();
                 rotation = 0;
-                if(delay = 100) delay = 250;
+                if(delay = 30) delay = 250 - (20 * (niveau - 1));
             }
             if(collision() == 2) {
                 fin_de_partie();
@@ -371,8 +375,6 @@
 	//   Initialisation du canvas
     function init() {
         afficherAide();
-        let reponse = demander_grille();
-        if(reponse == 'oui') afficher_grillle = true;
         initGrille();
         numForme = nouvelleForme();
         formeSuivante = nouvelleForme();
@@ -404,8 +406,8 @@
 
 
     function fin_de_partie () {
-
-        if (confirm("Fin de la partie !\n\nVous avez complété " + ctrLignes + " lignes.\nVotre score est de " + score + ".\n\nAppuyez sur 'OK' pour rejouer ou sur 'Cancel' pour arrêter le jeu.")) {
+        AUDIO.pause();
+        if (confirm("Fin de la partie !\n\nVous avez complété " + ctrLignes + " lignes.\nVotre score est de " + score + ".\nVous avez atteint le niveau " + niveau + "/10.\n\nAppuyez sur 'OK' pour rejouer ou sur 'Cancel' pour arrêter le jeu.")) {
             formY--;
             location.reload();
           } else {
@@ -464,22 +466,19 @@
                 break;
 
             case 'ArrowRight' :
-                // if(formX < LARGEUR_GRILLE - 3) formX++;
-
                 temp = formX;	// On mémorise la rotation actuelle
                 formX++; 		// On passe à la rotation suivante
                 if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
             case 'ArrowLeft' :
-                // if(formX > 0) formX--;
                 temp = formX;	// On mémorise la rotation actuelle
                 formX--; 		// On passe à la rotation suivante
                 if(collision()) formX = temp; // Si la rotation est impossible on revient à la précédente
                 break;
 
             case ' ' :
-                delay = 50;
+                delay = 30;
                 break;
             
             case 'e' :
@@ -493,15 +492,6 @@
             case 'h' : 
                 afficherAide();
                 break;
-
-            // case 't':  // touche t
-            //     // à compléter
-			// 	// pour test, ne fait pas parti du jeu final
-			// 	// permet de changer la pièce à afficher (changement de la variable numForme)
-            //     numForme++;
-            //     rotation = 0;
-            //     if(numForme > forme.length - 1) numForme = 0;
-            //     break;
         }
       }, true);
 }
