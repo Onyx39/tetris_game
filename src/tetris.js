@@ -192,6 +192,44 @@
             }
         }
     }
+
+    ///////////////////////////////////////////////////////
+
+    function drawShadow (numforme, formx, formy, rotationn) {
+        let decalage = findShadowCollision();
+        console.log(decalage)
+        for(x=0 ; x<forme[numforme][rotationn].length ; x++) {
+			for(y=0 ; y<forme[numforme][rotationn].length ; y++) {
+                if(forme[numforme][rotationn][y][x] == 1) {
+                    ctx.fillStyle = couleursFormes[numforme][1]; // Couleur du contour de la forme
+                    ctx.fillRect((formx + x) * CARREAU, (formy + y + decalage) * CARREAU, CARREAU, CARREAU); // Contour de la forme
+                    ctx.fillStyle = "White"; // Couleur de remplissage de la forme
+                    ctx.fillRect((formx + x) * CARREAU + 1, (formy + y + decalage) * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
+                }
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////
+
+    function findShadowCollision () {
+        for(i=0; i<HAUTEUR_GRILLE; i++) {
+            for(x=0 ; x<forme[numForme][rotation].length ; x++) {
+                for(y=0 ; y<forme[numForme][rotation].length ; y++) {
+                    if(forme[numForme][rotation][y][x] == 1) {
+                        if(formY + y + i> HAUTEUR_GRILLE - 1) {
+                            return i - 1
+                        }
+                        if(grille[formX + x][formY + y + i] != -1){
+                            return i - 1
+                        }
+                    }
+                }
+            }
+        }
+        return 0
+
+    }
     
     ///////////////////////////////////////////////////////
 
@@ -228,13 +266,6 @@
                     ctx.fillStyle = couleursFormes[grille[x][y]][0]; // Couleur de remplissage de la forme
                     ctx.fillRect(x * CARREAU + 1, y * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
                 }
-                // else {
-                //     ctx.fillStyle = "Black";
-                //     ctx.fillRect(x * CARREAU,  y * CARREAU, CARREAU, CARREAU); // Contour de la forme
-                //     ctx.fillStyle = "White" // Couleur de remplissage de la forme
-                //     ctx.fillRect(x * CARREAU + 1, y * CARREAU + 1, CARREAU - 2, CARREAU - 2); // Remplissage de la forme
-
-                // }
             }
             if(afficher_grillle) {
                 colors = ["darkblue", "darkred"]
@@ -299,6 +330,7 @@
     //      Utilisation de l'objet canvas : https://developer.mozilla.org/fr/docs/Web/API/Canvas_API/Tutorial/Basic_usage
     function refreshCanvas() {
 		ctx.clearRect(0,0,LARGEUR_GRILLE * CARREAU, HAUTEUR_GRILLE * CARREAU); // Efface la grille
+        drawShadow(numForme, formX, formY, rotation, 3);
 		drawForme(numForme, formX, formY, rotation); // Dessine la forme
         ctx.clearRect(LARGEUR_GRILLE * CARREAU + 5, 20, 150, 100);
         drawForme(formeSuivante, 16, 1.5, 0);
